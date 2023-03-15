@@ -19,6 +19,10 @@ MYSQL_PASSWORD=test
 MYSQL_PORT=3306
 MYSQL_ROOT_PASSWORD=test
 ```
+# 启动
+```
+sudo docker-compose up -d
+```
 
 # 安装
 >推荐使用第二种方法进行安装，进入php容器执行，可以看到执行过程。
