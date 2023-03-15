@@ -1,4 +1,5 @@
 # .env 环境变量
+>cp .env.example .env
 ```
 #blesta的文件路径
 WEB_PATH=./blesta
