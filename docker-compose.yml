@@ -1,0 +1,48 @@
+version: '3.5'
+services:
+
+# nginx
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
+        - PHP_UPSTREAM_PORT=${NGINX_PHP_UPSTREAM_PORT}
+    volumes:
+      - ${WEB_PATH}:/var/www/html
+      - ./nginx/sites/:/etc/nginx/sites-available
+      - ./.data/logs-nginx/:/var/log/nginx
+    ports:
+      - ${NGINX_PORT_HTTP}:80
+      - 443:443
+    depends_on:
+      - php-fpm
+
+# PHP-FPM
+  php-fpm:
+    build:
+      context: ./php-fpm
+      dockerfile: ${PHP_VERSION}.Dockerfile
+    volumes:
+      - ${WEB_PATH}:/var/www/html
+      - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
+    expose:
+      - "9000"
+
+# MySQL
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT}:3306"
+
