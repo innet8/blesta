@@ -52,3 +52,7 @@ For more detailed instructions, please see the
 [documentation](http://docs.blesta.com/display/user/Upgrading+Blesta#UpgradingBlesta-Patchinganexistinginstall)
 for patching Blesta.
 
+
+# 安装
+>推荐使用第二种方法进行安装，进入php容器执行，可以看到执行过程。
+![image](https://user-images.githubusercontent.com/85656971/225224010-e134bd86-38e9-45ad-b558-e1730b73152f.png)
