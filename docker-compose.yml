@@ -1,33 +1,30 @@
 version: '3.5'
 services:
 
-# nginx
   nginx:
-    build:
-      context: ./nginx
-      args:
-        - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
-        - PHP_UPSTREAM_PORT=${NGINX_PHP_UPSTREAM_PORT}
-    volumes:
-      - ${WEB_PATH}:/var/www/html
-      - ./nginx/sites/:/etc/nginx/sites-available
-      - ./.data/logs-nginx/:/var/log/nginx
+    image: "nginx:alpine"
     ports:
       - ${NGINX_PORT_HTTP}:80
       - 443:443
+    volumes:
+        - ./nginx/sites/:/etc/nginx/conf.d/
+        - ./.data/logs-nginx/:/var/log/nginx
+        - ${WEB_PATH}:/var/www/html
+    environment:
+        TZ: "Asia/Shanghai"
     depends_on:
-      - php-fpm
+        - php
+    restart: unless-stopped
 
 # PHP-FPM
-  php-fpm:
-    build:
-      context: ./php-fpm
-      dockerfile: ${PHP_VERSION}.Dockerfile
+  php:
+    image: "1300775666/php:v2"
     volumes:
       - ${WEB_PATH}:/var/www/html
       - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
     expose:
       - "9000"
+    restart: unless-stopped
 
 # MySQL
   mysql:
@@ -45,4 +42,4 @@ services:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
-
+    restart: unless-stopped 
