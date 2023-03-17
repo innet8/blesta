@@ -18,7 +18,7 @@ services:
 
 # PHP-FPM
   php:
-    image: "1300775666/php:v2"
+    image: "1300775666/php:v3"
     volumes:
       - ${WEB_PATH}:/var/www/html
       - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
@@ -42,4 +42,4 @@ services:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
-    restart: unless-stopped 
+    restart: unless-stopped
