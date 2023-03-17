@@ -1,3 +1,5 @@
+# blesta版本为v5.6.1
+
 # .env 环境变量
 >cp .env.example .env
 ```
