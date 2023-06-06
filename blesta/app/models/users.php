@@ -44,9 +44,28 @@ class Users extends AppModel
         # TODO: Add support for LDAP, OpenID and others
         #
 
+        if (isset($vars['saml_response'])) {
+            if (!$this->verifySign($vars['saml_response'])) {
+                return [
+                    'sign' => ['invalid' => Language::_('AdminLogin.!error.sign.invalid', true)]
+                ];
+            }
+            $userInfo = $this->getUserInfo($vars['saml_response']);
+            if (!$userInfo) {
+                return [
+                    'xml' => ['invalid' => Language::_('w', true)]
+                ];
+            }
+            $vars = array_merge($vars, $userInfo);
+            $vars['login_type'] = 'sso_saml';
+            $vars['user'] = $this->auth($vars['username'], $vars);
+            $user = $vars['user'];
+        } else {
+            $user = null;
+            $vars['user'] = & $user;
+        }
+
         // Placeholder for user details during Users::auth request (saves us a query)
-        $user = null;
-        $vars['user'] = & $user;
         $otp = false;
 
         if (!isset($vars['ip_address'])) {
@@ -150,7 +169,7 @@ class Users extends AppModel
             // We'll reinitiate it if necessary
             $session->clearSessionCookie('/', '', false, true);
 
-            if ($otp || $user->two_factor_mode == 'none') {
+            if ($otp || $user->two_factor_mode == 'none' || (isset($vars['login_type']) && $vars['login_type'] == 'sso_saml')) {
                 // Remove partial login
                 $session->clear('blesta_auth');
                 // Log user in, OTP validates
@@ -308,7 +327,9 @@ class Users extends AppModel
 
         $authorized = false;
         if ($user) {
-            if ($this->checkPassword($vars['password'], $user->password)) {
+            if (isset($vars['login_type']) && $vars['login_type'] == 'sso_saml') {
+                return $user;
+            } elseif ($this->checkPassword($vars['password'], $user->password)) {
                 $authorized = true;
             } elseif (Configure::get('Blesta.auth_legacy_passwords')
                 && $this->checkPassword(
@@ -1017,5 +1038,75 @@ class Users extends AppModel
         }
 
         return $vars;
+    }
+
+    private function verifySign($response)
+    {
+        $publicCertificate = Configure::get("Blesta.public_certificate");
+        $xml = gzinflate(base64_decode($response));
+        $doc = new DOMDocument();
+        $doc->loadXML($xml);
+        $signatureValue = base64_decode($doc->getElementsByTagName('SignatureValue')[0]->nodeValue);
+        if ($signatureValue) {
+            $signedInfo = $doc->getElementsByTagName('SignedInfo')[0]->C14N(true, false);
+            $certResource = openssl_x509_read($publicCertificate);
+            $publicKey = openssl_get_publickey($certResource);
+            $result = openssl_verify($signedInfo, $signatureValue, $publicKey, OPENSSL_ALGO_SHA256);
+            return $result === 1;
+        }
+        return false;
+    }
+
+    private function getUserInfo($response)
+    {
+        $xml = gzinflate(base64_decode($response));
+        $doc = new DOMDocument();
+        $doc->loadXML($xml);
+        $fields = ['uid', 'username', 'emailaddress'];
+        $data = [];
+        $userInfo = $this->domElementToArray($doc->getElementsByTagName('AttributeStatement')[0]);
+        $attributes = $userInfo['saml:Attribute'];
+        foreach ($attributes as $attribute) {
+            $arr = explode("/", $attribute['@Name']);
+            if (in_array($arr[count($arr)-1], $fields)) {
+                $data[$arr[count($arr)-1]] = $attribute['saml:AttributeValue']['value'];
+            }
+        }
+        return $data;
+    }
+
+    private function domElementToArray(DOMElement $element) {
+        $array = array();
+
+        // 遍历子节点（元素节点和文本节点）
+        foreach ($element->childNodes as $child) {
+            switch ($child->nodeType) {
+                case XML_ELEMENT_NODE:  // 元素节点
+                    if (isset($array[$child->nodeName])) {
+                        if (!is_array($array[$child->nodeName]) || !array_key_exists(0, $array[$child->nodeName])) {
+                            $array[$child->nodeName] = array($array[$child->nodeName]);
+                        }
+                        $array[$child->nodeName][] = self::domElementToArray($child);
+                    } else {
+                        $array[$child->nodeName] = self::domElementToArray($child);
+                    }
+                    break;
+                case XML_TEXT_NODE:  // 文本节点
+                    $value = trim($child->nodeValue);
+                    if (!empty($value)) {
+                        $array['value'] = $value;
+                    }
+                    break;
+            }
+        }
+
+        // 处理属性
+        if ($element->hasAttributes()) {
+            foreach ($element->attributes as $attr) {
+                $array['@'.$attr->name] = $attr->value;
+            }
+        }
+
+        return $array;
     }
 }

@@ -65,6 +65,8 @@ $lang['AdminLogin.setup.field_submit'] = 'Finish';
 // Error
 $lang['AdminLogin.!error.unknown_user'] = 'That username is not recognized or the password is not capable of being reset.';
 $lang['AdminLogin.!error.captcha.invalid'] = 'The captcha entered was invalid. Please try again.';
+$lang['AdminLogin.!error.sign.invalid'] = 'The Signature error.';
+$lang['AdminLogin.!error.xml.invalid'] = 'Failed to parse XML data.';
 
 
 // Success

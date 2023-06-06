@@ -180,6 +180,15 @@ class AdminLogin extends AppController
             $captcha = Captcha::get();
         }
 
+        if (!empty($this->get) && isset($this->get['SAMLResponse']) && empty($this->post)) {
+            $errors = $this->Users->login($this->Session, ['saml_response' => $this->get['SAMLResponse']]);
+            if (is_array($errors) && $errors) {
+                $this->setMessage('error', $errors);
+            } else {
+                $this->forwardPostAuth();
+            }
+        }
+
         if (!empty($this->post)) {
             // Ensure the IP address is determined automatically by disallowing it from being set
             unset($this->post['ip_address']);
