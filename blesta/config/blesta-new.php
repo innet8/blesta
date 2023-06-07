@@ -277,6 +277,7 @@ Configure::set('Blesta.csrf_bypass', []);
 // NEVER MODIFY THIS VALUE OR ALL ENCRYPTED DATA WILL BE LOST!
 Configure::set('Blesta.system_key', '{system_key}');
 
+// SSO SAML Verify signature certificate
 Configure::set('Blesta.public_certificate', "
 -----BEGIN CERTIFICATE-----
 MIIFUzCCAzugAwIBAgIRAK+Mr2MVBE23vOUlQXdNmycwDQYJKoZIhvcNAQELBQAw
@@ -310,3 +311,9 @@ whYAZR3wNsVez1dN/1RWIbqp9/xq1s8RFtcB1x/G7ZDTpf9i918J4xf2FqfNR7y+
 easajWZGAd0Hx7hOOcPfMJSbCggw8JI=
 -----END CERTIFICATE-----
 ");
+
+// SSO SAML ADMIN URL
+Configure::set('Blesta.admin_sso_url', 'https://154.207.98.241:9443/application/saml/blesta_admin/sso/binding/init/');
+
+// SSO SAML CLIENT URL
+Configure::set('Blesta.client_sso_url', 'https://154.207.98.241:9443/application/saml/blesta-client/sso/binding/init/');

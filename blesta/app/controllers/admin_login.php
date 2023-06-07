@@ -221,6 +221,7 @@ class AdminLogin extends AppController
         }
 
         $this->set('captcha', ($captcha !== null ? $captcha->buildHtml() : ''));
+        $this->set('sso_url', Configure::get("Blesta.admin_sso_url"));
     }
 
     /**

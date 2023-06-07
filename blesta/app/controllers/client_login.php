@@ -87,6 +87,7 @@ class ClientLogin extends AppController
         }
 
         $this->set('captcha', ($captcha !== null ? $captcha->buildHtml() : ''));
+        $this->set('sso_url', Configure::get("Blesta.client_sso_url"));
     }
 
     /**

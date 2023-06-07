@@ -54,6 +54,15 @@
                             <?php
                             $this->Form->end();
                             ?>
+                            <?php
+                            if (isset($sso_url) && $sso_url) {
+                            ?>
+                                <fieldset>
+                                     <a href="<?php echo $sso_url; ?>" class="btn btn-secondary btn-block">SSO Log In</a>
+                                </fieldset>
+                            <?php
+                            }
+                            ?>
                         </div>
                         <div class="panel-footer">
                             <a href="<?php echo $this->Html->safe($this->base_uri . 'login/reset/');?>"><?php $this->_('ClientLogin.index.link_resetpassword');?></a>

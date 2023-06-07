@@ -76,7 +76,16 @@
                         $this->Form->end();
                         ?>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer" style="display: flex;justify-content: space-around;align-items: center;">
+                        <?php
+                       if (isset($sso_url) && $sso_url) {
+                       ?>
+                       <div class="pass-reset">
+                          <a href="<?php echo $sso_url;?>">SSO Log In</a>
+                      </div>
+                       <?php
+                       }
+                       ?>
                        <div class="pass-reset">
                            <a href="<?php echo $this->base_uri . 'login/reset/';?>"><?php $this->_('AdminLogin.index.link_resetpassword');?></a>
                        </div>
